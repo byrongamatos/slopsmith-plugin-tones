@@ -1,0 +1,10 @@
+{
+  "id": "tones",
+  "name": "Tone Player",
+  "version": "1.0.0",
+  "private": false,
+  "nav": { "label": "Tones", "screen": "tones" },
+  "screen": "screen.html",
+  "script": "screen.js",
+  "routes": "routes.py"
+}
