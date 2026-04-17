@@ -11,10 +11,24 @@ _plugin_dir = Path(__file__).parent
 _gear_map = None
 
 
+def _get_assets_dir():
+    """Get the assets directory, checking user plugins dir first, then bundled."""
+    # Check user plugins directory first (for slopsmith-desktop)
+    user_plugins_dir = os.environ.get("SLOPSMITH_PLUGINS_DIR")
+    if user_plugins_dir:
+        user_assets = Path(user_plugins_dir) / "tones" / "assets"
+        if user_assets.exists():
+            return user_assets
+    
+    # Fall back to bundled assets
+    return _plugin_dir / "assets"
+
+
 def _load_gear_map():
     global _gear_map
     if _gear_map is None:
-        map_file = _plugin_dir / "assets" / "gear_map.json"
+        assets_dir = _get_assets_dir()
+        map_file = assets_dir / "gear_map.json"
         if map_file.exists():
             _gear_map = json.loads(map_file.read_text())
         else:
@@ -25,6 +39,7 @@ def _load_gear_map():
 def _find_gear_image(effect_type):
     """Find the image file for a gear effect type like 'Amp_EN50' or 'Pedal_Distortion'."""
     gear_map = _load_gear_map()
+    assets_dir = _get_assets_dir()
 
     # Try: exact key, then with _0/_1/_2/_3 suffix (channel variants)
     candidates = [effect_type] + [f"{effect_type}_{i}" for i in range(4)]
@@ -34,7 +49,7 @@ def _find_gear_image(effect_type):
         if info and info.get("image"):
             image_key = info["image"]
             for subdir in ["amps", "cabs", "pedals", "racks"]:
-                img = _plugin_dir / "assets" / subdir / f"{image_key}.png"
+                img = assets_dir / subdir / f"{image_key}.png"
                 if img.exists():
                     return str(img), info.get("name", effect_type)
 
@@ -47,7 +62,7 @@ def _find_gear_image(effect_type):
             if info and info.get("image"):
                 image_key = info["image"]
                 for subdir in ["amps", "cabs", "pedals", "racks"]:
-                    img = _plugin_dir / "assets" / subdir / f"{image_key}.png"
+                    img = assets_dir / subdir / f"{image_key}.png"
                     if img.exists():
                         return str(img), info.get("name", effect_type)
 
@@ -152,8 +167,8 @@ def setup(app, context):
     @app.get("/api/plugins/tones/assets-status")
     def assets_status():
         """Check if gear assets have been extracted."""
-        assets_dir = _plugin_dir / "assets"
-        if not assets_dir.exists() or not (_plugin_dir / "assets" / "gear_map.json").exists():
+        assets_dir = _get_assets_dir()
+        if not assets_dir.exists() or not (assets_dir / "gear_map.json").exists():
             return {"ready": False, "message": "Gear assets not extracted. Run extract_assets.py first."}
         amp_count = len(list((assets_dir / "amps").glob("*.png")))
         pedal_count = len(list((assets_dir / "pedals").glob("*.png")))
