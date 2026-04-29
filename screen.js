@@ -196,5 +196,9 @@ function _tpInjectPlayerButton(filename) {
         showScreen('plugin-tones');
         tpLoadSong(filename, document.getElementById('hud-title')?.textContent + ' - ' + document.getElementById('hud-artist')?.textContent);
     };
-    controls.insertBefore(btn, closeBtn);
+    if (closeBtn && closeBtn.parentNode === controls) {
+        controls.insertBefore(btn, closeBtn);
+    } else {
+        controls.appendChild(btn);
+    }
 }
