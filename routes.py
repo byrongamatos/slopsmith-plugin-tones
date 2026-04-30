@@ -200,7 +200,10 @@ def setup(app, context):
         # stripped-down format with stems + arrangement JSON only. Return
         # an empty arrangements list rather than feeding a non-PSARC into
         # the PSARC parser (which 500s on the magic-byte check).
-        if filename.lower().endswith(".sloppak") or psarc_path.is_dir():
+        # Normalize away any trailing path separators so both "foo.sloppak"
+        # and "foo.sloppak/" are detected, while arbitrary non-sloppak
+        # directories are not silently swallowed.
+        if filename.rstrip("/\\").lower().endswith(".sloppak"):
             return {"arrangements": []}
 
         files = read_psarc_entries(str(psarc_path), ["*.json"])
