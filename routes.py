@@ -196,6 +196,13 @@ def setup(app, context):
         if not psarc_path.exists():
             return {"error": "File not found"}
 
+        # Sloppaks don't carry RS-format tone manifests — they're a
+        # stripped-down format with stems + arrangement JSON only. Return
+        # an empty arrangements list rather than feeding a non-PSARC into
+        # the PSARC parser (which 500s on the magic-byte check).
+        if filename.lower().endswith(".sloppak") or psarc_path.is_dir():
+            return {"arrangements": []}
+
         files = read_psarc_entries(str(psarc_path), ["*.json"])
         arrangements = []
 
