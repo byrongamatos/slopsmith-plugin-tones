@@ -206,6 +206,12 @@ def setup(app, context):
         if filename.rstrip("/\\").lower().endswith(".sloppak"):
             return {"arrangements": []}
 
+        if psarc_path.is_dir():
+            return {"error": "Not a file"}
+
+        if not psarc_path.suffix.lower() == ".psarc":
+            return {"error": "Not a PSARC file"}
+
         files = read_psarc_entries(str(psarc_path), ["*.json"])
         arrangements = []
 
