@@ -207,10 +207,10 @@ def setup(app, context):
             return {"arrangements": []}
 
         if psarc_path.is_dir():
-            return {"error": "Not a file"}
+            return {"error": "Path is a directory, not a file"}
 
         if not psarc_path.suffix.lower() == ".psarc":
-            return {"error": "Not a PSARC file"}
+            return {"error": "Invalid file type: expected .psarc file"}
 
         files = read_psarc_entries(str(psarc_path), ["*.json"])
         arrangements = []
