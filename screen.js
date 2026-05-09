@@ -3,6 +3,14 @@
 // ── Init ────────────────────────────────────────────────────────────────
 
 (function() {
+    // Idempotency: if screen.js is re-evaluated (loader cache miss, hot reload,
+    // older core builds without the load-side guard), don't re-wrap showScreen —
+    // each re-wrap captures the previous wrapper, growing the chain and
+    // leaking closures.
+    const HOOK_KEY = '__slopsmithTonesShowScreenInstalled';
+    if (window[HOOK_KEY]) return;
+    window[HOOK_KEY] = true;
+
     const origShowScreen = window.showScreen;
     window.showScreen = function(id) {
         origShowScreen(id);
@@ -175,6 +183,12 @@ function tpRenderGear(gear) {
 // ── Player integration: show tone button ────────────────────────────────
 
 (function() {
+    // Idempotency: see __slopsmithTonesShowScreenInstalled comment above. Same
+    // reasoning for the playSong wrapper.
+    const HOOK_KEY = '__slopsmithTonesPlaySongInstalled';
+    if (window[HOOK_KEY]) return;
+    window[HOOK_KEY] = true;
+
     const origPlaySong = window.playSong;
     window.playSong = async function(filename, arrangement) {
         await origPlaySong(filename, arrangement);
